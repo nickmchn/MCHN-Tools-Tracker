@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tools Tracker — MCHN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --black:#0a0a0a;
+  --off-black:#111111;
+  --deep:#1a1a1a;
+  --surface:#242424;
+  --surface2:#2a2a2a;
+  --border:#333333;
+  --border-light:#3d3d3d;
+  --accent:#e8401c;
+  --accent2:#c0341500;
+  --green:#ffffff;
+  --yellow:#d4a017;
+  --red:#e8401c;
+  --text:#ffffff;
+  --text-muted:#aaaaaa;
+  --text-dim:#666666;
+
+  --status-live-bg:rgba(255,255,255,.07);
+  --status-live-text:#ffffff;
+  --status-live-border:rgba(255,255,255,.2);
+
+  --status-progress-bg:rgba(212,160,23,.1);
+  --status-progress-text:#d4a017;
+  --status-progress-border:rgba(212,160,23,.3);
+
+  --status-not-bg:rgba(102,102,102,.12);
+  --status-not-text:#666666;
+  --status-not-border:rgba(102,102,102,.25);
+
+  --pri-high-bg:rgba(232,64,28,.12);
+  --pri-high-text:#e8401c;
+  --pri-high-border:rgba(232,64,28,.3);
+
+  --pri-med-bg:rgba(212,160,23,.1);
+  --pri-med-text:#d4a017;
+  --pri-med-border:rgba(212,160,23,.28);
+
+  --pri-low-bg:rgba(102,102,102,.08);
+  --pri-low-text:#666666;
+  --pri-low-border:rgba(102,102,102,.2);
+}
+
+body{font-family:'Barlow',sans-serif;background:var(--black);color:var(--text);min-height:100vh;}
+
+/* ── HEADER ── */
+.site-header{
+  background:var(--off-black);
+  border-bottom:1px solid var(--border);
+  padding:0 36px;
+  position:sticky;top:0;z-index:50;
+}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;}
+.logo-lockup{display:flex;align-items:center;gap:14px;}
+.logo-mark{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--accent);
+}
+.logo-text h1{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;}
+.logo-text p{font-size:11px;color:var(--text-dim);margin-top:1px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;}
+.header-right{display:flex;align-items:center;gap:16px;}
+.header-tag{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);border:1px solid var(--border);padding:4px 12px;
+}
+.sync-status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text-dim);flex-shrink:0;transition:all .3s;}
+.sync-dot.synced{background:var(--accent);box-shadow:0 0 6px rgba(232,64,28,.5);}
+.sync-dot.syncing{background:var(--yellow);animation:pulse 1s infinite;}
+.sync-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* ── HERO ── */
+.hero{
+  background:var(--off-black);
+  padding:40px 36px 44px;
+  border-bottom:3px solid var(--accent);
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:0;right:0;
+  width:300px;height:100%;
+  background:linear-gradient(to left,rgba(232,64,28,.04),transparent);
+  pointer-events:none;
+}
+.hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;z-index:1;}
+.hero-eyebrow{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:10px;
+}
+.hero-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--accent);}
+.hero h2{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--text);margin-bottom:8px;letter-spacing:2px;line-height:1;}
+.hero p{font-size:13px;color:var(--text-muted);max-width:420px;line-height:1.65;font-family:'Barlow',sans-serif;}
+.hero-stats{display:flex;gap:32px;flex-shrink:0;}
+.stat{text-align:right;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--text);line-height:1;letter-spacing:1px;}
+.stat-lbl{font-size:10px;color:var(--text-dim);margin-top:4px;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
+
+/* ── PROGRESS ── */
+.main{max-width:1200px;margin:0 auto;padding:28px 36px 80px;}
+
+.progress-section{
+  background:var(--surface);border:1px solid var(--border);
+  padding:20px 24px;margin-bottom:18px;
+}
+.progress-label{font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:10px;display:flex;justify-content:space-between;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
+.progress-track{height:4px;background:var(--surface2);overflow:hidden;display:flex;gap:2px;}
+.progress-seg{height:100%;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.progress-legend{display:flex;gap:18px;margin-top:10px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;}
+.legend-dot{width:8px;height:8px;}
+
+/* ── LOADING ── */
+.loading-state{text-align:center;padding:80px 20px;}
+.spinner{width:26px;height:26px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-state p{font-size:13px;color:var(--text-muted);}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.toolbar-left{display:flex;gap:8px;align-items:center;flex:1;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:1;min-width:180px;max-width:260px;}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--text-dim);pointer-events:none;}
+.search-input{
+  width:100%;padding:9px 10px 9px 32px;
+  border:1px solid var(--border);
+  font-size:13px;font-family:'Barlow',sans-serif;
+  background:var(--surface);color:var(--text);outline:none;
+  transition:border .15s;
+}
+.search-input::placeholder{color:var(--text-dim);}
+.search-input:focus{border-color:var(--accent);}
+.filter-select{
+  padding:9px 12px;border:1px solid var(--border);
+  font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;
+  background:var(--surface);color:var(--text);outline:none;cursor:pointer;
+  transition:border .15s;
+}
+.filter-select:focus{border-color:var(--accent);}
+.btn{
+  padding:9px 18px;font-size:12px;font-weight:600;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;
+}
+.btn-primary{background:var(--accent);color:#fff;border:none;}
+.btn-primary:hover{background:#c0341a;}
+.btn svg{width:13px;height:13px;}
+
+.view-toggle{display:flex;border:1px solid var(--border);overflow:hidden;background:var(--surface);}
+.view-btn{padding:8px 11px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;color:var(--text-dim);transition:all .15s;}
+.view-btn.active{background:var(--accent);color:#fff;}
+.view-btn svg{width:14px;height:14px;}
+
+/* ── SUMMARY BAR ── */
+.summary-bar{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap;}
+.summary-pill{
+  padding:5px 13px;font-size:11px;font-weight:600;
+  border:1px solid transparent;cursor:pointer;transition:all .15s;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;
+}
+.summary-pill.all{background:var(--surface);border-color:var(--border);color:var(--text-muted);}
+.summary-pill.all.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.summary-pill.live{background:var(--status-live-bg);border-color:var(--status-live-border);color:var(--status-live-text);}
+.summary-pill.live.active{background:var(--status-live-text);border-color:var(--status-live-text);color:var(--black);}
+.summary-pill.progress{background:var(--status-progress-bg);border-color:var(--status-progress-border);color:var(--status-progress-text);}
+.summary-pill.progress.active{background:var(--status-progress-text);border-color:var(--status-progress-text);color:var(--black);}
+.summary-pill.not-started{background:var(--status-not-bg);border-color:var(--status-not-border);color:var(--status-not-text);}
+.summary-pill.not-started.active{background:var(--text-muted);border-color:var(--text-muted);color:var(--black);}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid var(--border);}
+thead th{
+  padding:11px 14px;text-align:left;
+  font-size:10px;font-weight:600;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:2px;white-space:nowrap;
+  font-family:'Barlow Condensed',sans-serif;
+}
+.sort-btn{
+  background:none;border:none;font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;font-weight:600;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:2px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;padding:0;
+}
+.sort-btn:hover{color:var(--accent);}
+.sort-btn.active{color:var(--accent);}
+.sort-btn .sort-arrow{font-size:10px;opacity:.6;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+td{padding:12px 14px;font-size:13px;vertical-align:middle;}
+.td-name{font-family:'Bebas Neue',sans-serif;color:var(--text);font-size:16px;letter-spacing:.5px;}
+.td-desc{color:var(--text-muted);font-size:12px;margin-top:3px;line-height:1.45;font-family:'Barlow',sans-serif;}
+.td-cat{font-size:10px;font-weight:600;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
+.td-url{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--accent);opacity:.7;margin-top:2px;letter-spacing:1px;}
+
+/* ── INLINE SELECTS ── */
+.inline-select{
+  padding:4px 22px 4px 8px;border:1px solid transparent;
+  font-size:11px;font-weight:600;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 6px center;
+  transition:border-color .15s;
+}
+.inline-select:hover{border-color:var(--border-light);}
+.inline-select:focus{border-color:var(--accent);}
+
+.sel-live{background:var(--status-live-bg);color:var(--status-live-text);border-color:var(--status-live-border)!important;}
+.sel-progress{background:var(--status-progress-bg);color:var(--status-progress-text);border-color:var(--status-progress-border)!important;}
+.sel-not-started{background:var(--status-not-bg);color:var(--status-not-text);border-color:var(--status-not-border)!important;}
+.sel-high{background:var(--pri-high-bg);color:var(--pri-high-text);border-color:var(--pri-high-border)!important;}
+.sel-medium{background:var(--pri-med-bg);color:var(--pri-med-text);border-color:var(--pri-med-border)!important;}
+.sel-low{background:var(--pri-low-bg);color:var(--pri-low-text);border-color:var(--pri-low-border)!important;}
+
+.sel-nick{background:rgba(232,64,28,.1);color:#e8401c;border-color:rgba(232,64,28,.3)!important;}
+.sel-jj{background:rgba(212,160,23,.1);color:#d4a017;border-color:rgba(212,160,23,.3)!important;}
+.sel-charlie{background:rgba(170,170,170,.1);color:#aaaaaa;border-color:rgba(170,170,170,.3)!important;}
+.sel-unassigned{background:var(--status-not-bg);color:var(--text-dim);border-color:var(--status-not-border)!important;}
+
+/* ── NOTES ── */
+.notes-input{
+  font-size:12px;font-family:'Barlow',sans-serif;color:var(--text-muted);
+  border:1px solid transparent;padding:6px 8px;width:100%;
+  outline:none;background:transparent;resize:none;min-height:48px;line-height:1.5;
+  transition:all .15s;
+}
+.notes-input::placeholder{color:var(--text-dim);}
+.notes-input:hover{border-color:var(--border);background:var(--surface2);}
+.notes-input:focus{border-color:var(--accent);background:var(--deep);}
+
+/* ── URL PROMPT ── */
+.url-prompt{display:flex;align-items:center;gap:6px;margin-top:7px;animation:fadeUp .2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.url-prompt-input{
+  flex:1;padding:5px 8px;border:1px solid var(--status-live-border);
+  font-size:11px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;color:var(--accent);outline:none;
+  background:rgba(232,64,28,.05);min-width:0;
+}
+.url-prompt-input::placeholder{color:var(--text-dim);font-family:'Barlow',sans-serif;}
+.url-prompt-input:focus{border-color:var(--accent);}
+.url-prompt-btn{
+  width:26px;height:26px;border:none;
+  background:var(--accent);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:background .15s;
+}
+.url-prompt-btn:hover{background:#c0341a;}
+.url-prompt-btn svg{width:12px;height:12px;}
+
+/* ── CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;}
+.tool-card{
+  background:var(--surface);border:1px solid var(--border);
+  padding:20px;display:flex;flex-direction:column;gap:12px;
+  transition:border-color .2s;
+}
+.tool-card:hover{border-color:var(--border-light);}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.card-name{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--text);letter-spacing:.5px;}
+.card-desc{font-size:12px;color:var(--text-muted);line-height:1.5;margin-top:4px;font-family:'Barlow',sans-serif;}
+.card-footer{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.card-field label{font-size:9px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:2px;display:block;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;}
+.card-field .inline-select{width:100%;}
+.card-notes{border-top:1px solid var(--border);padding-top:10px;}
+.card-notes label{font-size:9px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:2px;display:block;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;}
+
+/* ── ACTION BUTTONS ── */
+.action-row{display:flex;gap:5px;align-items:center;}
+.icon-btn{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);background:var(--surface2);
+  cursor:pointer;color:var(--text-muted);transition:all .15s;text-decoration:none;
+}
+.icon-btn:hover{border-color:var(--border-light);color:var(--text);}
+.icon-btn.danger:hover{border-color:rgba(232,64,28,.5);color:var(--red);background:rgba(232,64,28,.08);}
+.icon-btn svg{width:12px;height:12px;}
+.icon-btn.disabled{opacity:.2;pointer-events:none;}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.modal{
+  background:var(--deep);border:1px solid var(--border);
+  padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
+}
+.modal h3{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);margin-bottom:20px;letter-spacing:1px;}
+.form-field{margin-bottom:14px;}
+.form-field label{font-size:10px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
+.form-input{
+  width:100%;padding:9px 12px;border:1px solid var(--border);
+  font-size:13px;font-family:'Barlow',sans-serif;outline:none;
+  color:var(--text);background:var(--surface);transition:border .15s;
+}
+.form-input::placeholder{color:var(--text-dim);}
+.form-input:focus{border-color:var(--accent);}
+.form-select{
+  width:100%;padding:9px 12px;border:1px solid var(--border);
+  font-size:13px;font-family:'Barlow',sans-serif;outline:none;
+  color:var(--text);background:var(--surface);transition:border .15s;
+}
+.form-select:focus{border-color:var(--accent);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
+.btn-secondary{background:var(--surface);color:var(--text-muted);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--border-light);color:var(--text);}
+.hidden{display:none;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  padding:10px 18px;font-size:11px;font-weight:600;
+  opacity:0;transform:translateY(10px);transition:all .25s;
+  pointer-events:none;z-index:200;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;
+  border:1px solid transparent;
+}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.saved{background:var(--surface);color:var(--text);border-color:var(--border);}
+.toast.err{background:rgba(232,64,28,.15);color:var(--red);border-color:rgba(232,64,28,.3);}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim);}
+.empty-state svg{width:36px;height:36px;margin-bottom:12px;opacity:.2;}
+.empty-state p{font-size:13px;font-family:'Barlow',sans-serif;}
+
+/* ── FOOTER ── */
+.site-footer{background:var(--off-black);border-top:1px solid var(--border);padding:20px 36px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.footer-left p{font-size:11px;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
+.footer-right{font-size:10px;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
+
+@media(max-width:700px){
+  .site-header,.hero,.main{padding-left:16px;padding-right:16px;}
+  .hero-stats{display:none;}
+  .form-row{grid-template-columns:1fr;}
+  .cards-grid{grid-template-columns:1fr;}
+  th:nth-child(2),td:nth-child(2),th:nth-child(6),td:nth-child(6){display:none;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-lockup">
+      <div class="logo-mark">MCHN</div>
+      <div class="logo-text">
+        <h1>Tools Tracker · Internal</h1>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="header-tag">Internal Dashboard</span>
+      <div class="sync-status">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Connecting…</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Pipeline Overview</div>
+      <h2>Tools &amp; Calculators Tracker</h2>
+      <p>Track every tool in the pipeline. Changes by Nick, JJ, or Charlie sync automatically across all sessions.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--green)" id="stat-live">—</div><div class="stat-lbl">Live</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--yellow)" id="stat-wip">—</div><div class="stat-lbl">In Progress</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--text-dim)" id="stat-queue">—</div><div class="stat-lbl">Not Started</div></div>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>Pipeline progress</span>
+      <span id="progress-pct" style="color:var(--green);font-family:'DM Mono',monospace;">—</span>
+    </div>
+    <div class="progress-track" id="progress-track"></div>
+    <div class="progress-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Live</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>In progress</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--text-dim)"></div>Not started</div>
+    </div>
+  </div>
+
+  <div id="loading-state" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading shared tracker…</p>
+  </div>
+
+  <div id="token-setup" class="loading-state hidden">
+    <div style="max-width:420px;margin:0 auto;background:var(--surface);border:1px solid var(--border);padding:28px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--text);margin-bottom:8px;">Connect to GitHub</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">Paste your GitHub personal access token to sync this tracker. It's saved in your browser — you won't need to do this again.</p>
+      <input id="token-input" type="password" placeholder="ghp_..." style="width:100%;padding:10px 12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;outline:none;margin-bottom:12px;">
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveToken()">Connect</button>
+    </div>
+  </div>
+
+  <div id="main-content" class="hidden">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-wrap">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+          <input class="search-input" id="search" placeholder="Search tools…" oninput="render()">
+        </div>
+        <select class="filter-select" id="filter-status" onchange="render()">
+          <option value="">All statuses</option>
+          <option value="live">Live</option>
+          <option value="progress">In progress</option>
+          <option value="not-started">Not started</option>
+        </select>
+        <select class="filter-select" id="filter-assignee" onchange="render()">
+          <option value="">All assignees</option>
+          <option value="Nick">Nick</option>
+          <option value="JJ">JJ</option>
+          <option value="Charlie">Charlie</option>
+          <option value="Unassigned">Unassigned</option>
+        </select>
+        <select class="filter-select" id="filter-category" onchange="render()">
+          <option value="">All categories</option>
+          <option value="Budgeting">Budgeting</option>
+          <option value="Business">Business</option>
+          <option value="Investing">Investing</option>
+          <option value="Planning">Planning</option>
+          <option value="Retirement">Retirement</option>
+          <option value="Tax">Tax</option>
+        </select>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="view-table" onclick="setView('table')" title="Table view">
+          <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="14" height="3" rx="1"/><rect x="1" y="6" width="14" height="3" rx="1"/><rect x="1" y="11" width="14" height="3" rx="1"/></svg>
+        </button>
+        <button class="view-btn" id="view-cards" onclick="setView('cards')" title="Card view">
+          <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        </button>
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg>
+        Add tool
+      </button>
+    </div>
+
+    <div class="summary-bar" id="summary-bar"></div>
+
+    <div id="table-view">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:26%">Tool</th>
+              <th style="width:9%">Category</th>
+              <th style="width:14%"><button class="sort-btn active" id="sort-status-btn" onclick="toggleStatusSort()">Status <span class="sort-arrow" id="sort-arrow">↑</span></button></th>
+              <th style="width:9%">Assignee</th>
+              <th style="width:8%">Priority</th>
+              <th style="width:26%">Notes</th>
+              <th style="width:8%"></th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="cards-view" class="hidden">
+      <div class="cards-grid" id="cards-body"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Add Tool Modal -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h3>Add new tool</h3>
+    <div class="form-field">
+      <label>Tool name *</label>
+      <input class="form-input" id="f-name" placeholder="e.g. Roth Conversion Calculator">
+    </div>
+    <div class="form-field">
+      <label>Description</label>
+      <input class="form-input" id="f-desc" placeholder="Brief description">
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Category</label>
+        <select class="form-select" id="f-cat">
+          <option>Budgeting</option><option>Business</option><option>Investing</option>
+          <option>Planning</option><option>Retirement</option><option>Tax</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Priority</label>
+        <select class="form-select" id="f-priority">
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Status</label>
+        <select class="form-select" id="f-status">
+          <option value="not-started" selected>Not started</option>
+          <option value="progress">In progress</option>
+          <option value="live">Live</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Assignee</label>
+        <select class="form-select" id="f-assignee">
+          <option value="Unassigned" selected>Unassigned</option>
+          <option value="Nick">Nick</option>
+          <option value="JJ">JJ</option>
+          <option value="Charlie">Charlie</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>URL (if live)</label>
+      <input class="form-input" id="f-url" placeholder="/tool-slug">
+    </div>
+    <div class="form-field">
+      <label>Notes</label>
+      <input class="form-input" id="f-notes" placeholder="Any context">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addTool()">Add tool</button>
+    </div>
+  </div>
+</div>
+
+<!-- URL Prompt Modal -->
+<div class="modal-overlay hidden" id="url-modal-overlay">
+  <div class="modal" style="max-width:420px;">
+    <h3>🚀 Mark as Live</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px;line-height:1.65;">Add the URL path so the tracker links directly to the live tool. You can skip and add it later.</p>
+    <div class="form-field">
+      <label>Tool URL path</label>
+      <input class="form-input" id="url-modal-input" placeholder="/value-calculator" style="font-family:'DM Mono',monospace;">
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;font-family:'DM Mono',monospace;">Just the path — e.g. <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">/rent-vs-sell</code></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="confirmUrl(false)">Skip for now</button>
+      <button class="btn btn-primary" onclick="confirmUrl(true)">Save &amp; go live</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-left"><p>MCHN · Internal use only · Nick / JJ / Charlie</p></div>
+    <div class="footer-right">Tools Tracker © 2026</div>
+  </div>
+</footer>
+
+<script>
+// ── GitHub config — REPLACE THESE WITH YOUR CREDENTIALS ──
+const GH_REPO  = 'nickcadence/MCHN-Tools-Tracker';
+const GH_FILE  = 'tools.json';
+const GH_API   = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+let GH_TOKEN = localStorage.getItem('mchn_gh_token') || '';
+let GH_HEADS = {};
+let fileSha = null;
+
+function buildHeaders(){
+  GH_HEADS = { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+}
+
+function promptForToken(){
+  document.getElementById('loading-state').classList.add('hidden');
+  document.getElementById('token-setup').classList.remove('hidden');
+}
+
+function saveToken(){
+  const val = document.getElementById('token-input').value.trim();
+  if(!val){ alert('Please paste your GitHub token.'); return; }
+  GH_TOKEN = val;
+  localStorage.setItem('mchn_gh_token', val);
+  document.getElementById('token-setup').classList.add('hidden');
+  document.getElementById('loading-state').classList.remove('hidden');
+  buildHeaders();
+  init();
+}
+
+const DEFAULT_TOOLS = [
+  {id:1,name:"Retiree Budget",description:"Monthly income and expenses in retirement. Guaranteed income coverage and what-if scenarios.",category:"Budgeting",status:"live",assignee:"Unassigned",priority:"high",url:"/budget",notes:""},
+  {id:2,name:"Personal Budget",description:"Monthly pay, fixed and variable expenses, and savings goals. Savings rate and what-if scenarios.",category:"Budgeting",status:"live",assignee:"Unassigned",priority:"high",url:"/personal-budget",notes:""},
+  {id:3,name:"Allocation Calculator",description:"Four-bucket allocation, blended equity target, and account-level recommendations.",category:"Investing",status:"live",assignee:"Unassigned",priority:"high",url:"/twa",notes:""},
+  {id:4,name:"Quarterly Tax Estimator",description:"For business owners. Actual P&L each quarter vs. safe harbor side by side.",category:"Tax",status:"live",assignee:"Unassigned",priority:"high",url:"/tax-estimator",notes:""},
+  {id:5,name:"SS Claiming Optimizer",description:"Compare benefits at 62, FRA, and 70. Break-even age, lifetime totals, spousal and survivor benefits.",category:"Retirement",status:"live",assignee:"Unassigned",priority:"high",url:"/social-security",notes:""},
+  {id:6,name:"Cash vs. Finance: Vehicle Calculator",description:"Pay cash or finance and invest the difference? Models loan terms, returns, liquidity, and cash flow impact.",category:"Planning",status:"live",assignee:"Unassigned",priority:"high",url:"/vehicle-calculator",notes:""},
+  {id:7,name:"Value Calculator",description:"What Are You Really Paying For? Fee comparison and advisor value tool for prospects and clients.",category:"Planning",status:"live",assignee:"Unassigned",priority:"high",url:"/value-calculator",notes:""},
+  {id:8,name:"Rent vs. Sell Property",description:"Should you keep renting out a property or sell it? Models cash flow, capital gains, Section 121 exclusion, and net proceeds.",category:"Planning",status:"live",assignee:"Unassigned",priority:"high",url:"/rent-vs-sell",notes:""},
+  {id:9,name:"Roth Conversion Calculator",description:"Should you convert? How much, what's the tax hit, and what's the long-term break-even.",category:"Tax",status:"not-started",assignee:"Unassigned",priority:"high",url:"",notes:""},
+  {id:10,name:"RMD Calculator",description:"Required minimum distribution amounts by age, account balance, and IRS life expectancy table.",category:"Retirement",status:"not-started",assignee:"Unassigned",priority:"high",url:"",notes:""},
+  {id:11,name:"Trump Accounts vs. 529 vs. UTMA/UGMA",description:"Compare education and custodial savings vehicles — tax treatment, flexibility, control, and long-term outcomes.",category:"Planning",status:"not-started",assignee:"Unassigned",priority:"high",url:"",notes:"Timely given new Trump account legislation"},
+  {id:12,name:"Pay Off Mortgage vs. Save/Invest",description:"Extra payment toward the mortgage vs. investing the difference. After-tax return spread, payoff timeline, and net worth impact.",category:"Planning",status:"not-started",assignee:"Unassigned",priority:"high",url:"",notes:""},
+  {id:13,name:"Lease vs. Finance: Vehicle",description:"True cost comparison of leasing vs. financing. Monthly payment, total outlay, residual value, and mileage considerations.",category:"Planning",status:"not-started",assignee:"Unassigned",priority:"medium",url:"",notes:"Pairs well with Cash vs. Finance vehicle tool"},
+  {id:14,name:"Home Purchase: Down Payment vs. Save/Invest",description:"20% down now vs. less down and investing the difference. PMI cost, opportunity cost, and net worth trajectory over time.",category:"Planning",status:"not-started",assignee:"Unassigned",priority:"medium",url:"",notes:""},
+  {id:15,name:"Home Refinance Calculator",description:"Cost-benefit analysis of refinancing. Break-even on closing costs, monthly savings, and total interest saved over remaining term.",category:"Planning",status:"not-started",assignee:"Unassigned",priority:"medium",url:"",notes:""},
+  {id:16,name:"Business Valuation Estimator",description:"Estimate business value using revenue multiples, EBITDA multiples, and asset-based approaches. For business owner planning conversations.",category:"Business",status:"not-started",assignee:"Unassigned",priority:"medium",url:"",notes:""},
+  {id:17,name:"Monte Carlo / Will My Money Last?",description:"Probability of portfolio survival across market scenarios over a given retirement horizon.",category:"Retirement",status:"not-started",assignee:"Unassigned",priority:"medium",url:"",notes:""},
+  {id:18,name:"Net Worth Snapshot",description:"Assets vs. liabilities quick picture. Clean visual summary for client review meetings.",category:"Planning",status:"not-started",assignee:"Unassigned",priority:"medium",url:"",notes:""},
+  {id:19,name:"Tax Bracket Visualizer",description:"See how income layers stack across brackets. Marginal vs. effective rate clarity for planning conversations.",category:"Tax",status:"not-started",assignee:"Unassigned",priority:"low",url:"",notes:""}
+];
+
+let tools = [];
+let currentView = 'table';
+let activeFilter = '';
+let saveTimer = null;
+let lastSnapshot = '';
+let statusSortAsc = true;
+const STATUS_ORDER = {'not-started':0,'progress':1,'live':2};
+let pendingUrlToolId = null;
+
+function toggleStatusSort(){
+  statusSortAsc = !statusSortAsc;
+  document.getElementById('sort-arrow').textContent = statusSortAsc ? '↑' : '↓';
+  render();
+}
+
+function setSyncStatus(state, label){
+  document.getElementById('sync-dot').className = 'sync-dot ' + state;
+  document.getElementById('sync-label').textContent = label;
+}
+
+// ── GitHub API ──
+async function ghGet(){
+  const res = await fetch(GH_API, { headers: GH_HEADS });
+  if(!res.ok) throw new Error('GET ' + res.status);
+  const json = await res.json();
+  fileSha = json.sha;
+  return JSON.parse(atob(json.content.replace(/\n/g,''))).tools || [];
+}
+
+async function ghPut(data){
+  const body = {
+    message: 'Tracker update',
+    content: btoa(unescape(encodeURIComponent(JSON.stringify({ tools: data }, null, 2)))),
+    sha: fileSha
+  };
+  const res = await fetch(GH_API, { method:'PUT', headers:GH_HEADS, body:JSON.stringify(body) });
+  if(!res.ok) throw new Error('PUT ' + res.status);
+  fileSha = (await res.json()).content.sha;
+}
+
+// ── Init ──
+async function init(){
+  buildHeaders();
+  if(!GH_TOKEN){ promptForToken(); return; }
+  setSyncStatus('syncing', 'Connecting…');
+  try {
+    let existing = await ghGet();
+    if(!existing || !Array.isArray(existing) || existing.length === 0){
+      tools = DEFAULT_TOOLS;
+      await ghPut(tools);
+    } else {
+      tools = existing;
+    }
+    lastSnapshot = JSON.stringify(tools);
+    setSyncStatus('synced', 'Synced');
+    document.getElementById('loading-state').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+    render();
+    startPolling();
+  } catch(e){
+    setSyncStatus('error', 'Connection failed');
+    document.getElementById('loading-state').innerHTML =
+      `<p style="color:var(--red);font-size:14px;margin-bottom:12px;">Could not connect to GitHub. Token may be invalid.</p>
+       <button class="btn btn-primary" onclick="localStorage.removeItem('mchn_gh_token');location.reload();">Reset Token</button>`;
+  }
+}
+
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  setSyncStatus('syncing', 'Saving…');
+  saveTimer = setTimeout(async () => {
+    try {
+      await ghPut(tools);
+      lastSnapshot = JSON.stringify(tools);
+      setSyncStatus('synced', 'Synced');
+      showToast('Saved — visible to whole team', 'saved');
+    } catch(e){
+      setSyncStatus('error', 'Save failed');
+      showToast('Save failed — check connection', 'err');
+    }
+  }, 1500);
+}
+
+function startPolling(){
+  setInterval(async () => {
+    try {
+      const fresh = await ghGet();
+      const freshStr = JSON.stringify(fresh);
+      if(freshStr !== lastSnapshot){
+        tools = fresh;
+        lastSnapshot = freshStr;
+        render();
+        showToast('Updated by another team member', 'saved');
+      }
+    } catch(e){}
+  }, 45000);
+}
+
+// ── Field helpers ──
+const statusLabel = {live:'Live',progress:'In progress','not-started':'Not started'};
+const statusClass = {live:'sel-live',progress:'sel-progress','not-started':'sel-not-started'};
+const priorityClass = {high:'sel-high',medium:'sel-medium',low:'sel-low'};
+const assigneeClass = {Nick:'sel-nick',JJ:'sel-jj',Charlie:'sel-charlie',Unassigned:'sel-unassigned'};
+
+function makeStatusSelect(id, cur){
+  const opts = Object.entries(statusLabel).map(([v,l])=>`<option value="${v}"${v===cur?' selected':''}>${l}</option>`).join('');
+  return `<select class="inline-select ${statusClass[cur]||''}" onchange="onStatusChange(${id},this)">${opts}</select>`;
+}
+function makePrioritySelect(id, cur){
+  const opts = ['high','medium','low'].map(v=>`<option value="${v}"${v===cur?' selected':''}>${v.charAt(0).toUpperCase()+v.slice(1)}</option>`).join('');
+  return `<select class="inline-select ${priorityClass[cur]||''}" onchange="updateField(${id},'priority',this.value);applyClass(this,'priority')">${opts}</select>`;
+}
+function makeAssigneeSelect(id, cur){
+  const opts = ['Unassigned','Nick','JJ','Charlie'].map(v=>`<option value="${v}"${v===cur?' selected':''}>${v}</option>`).join('');
+  return `<select class="inline-select ${assigneeClass[cur]||''}" onchange="updateField(${id},'assignee',this.value);applyClass(this,'assignee')">${opts}</select>`;
+}
+function applyClass(el, type){
+  const map = type==='status'?statusClass:type==='priority'?priorityClass:assigneeClass;
+  el.className = 'inline-select ' + (map[el.value]||'');
+}
+
+function onStatusChange(id, selectEl){
+  const newStatus = selectEl.value;
+  const tool = tools.find(t=>t.id===id);
+  if(!tool) return;
+  applyClass(selectEl,'status');
+  if(newStatus==='live' && !tool.url){
+    pendingUrlToolId = id;
+    tool.status = 'live';
+    document.getElementById('url-modal-input').value = '';
+    document.getElementById('url-modal-overlay').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('url-modal-input').focus(),100);
+  } else {
+    tool.status = newStatus;
+    updateStats();
+    scheduleSave();
+    render();
+  }
+}
+
+function confirmUrl(save){
+  document.getElementById('url-modal-overlay').classList.add('hidden');
+  const tool = tools.find(t=>t.id===pendingUrlToolId);
+  if(!tool) return;
+  if(save){
+    const raw = document.getElementById('url-modal-input').value.trim();
+    tool.url = raw ? (raw.startsWith('/')?raw:'/'+raw) : '';
+    showToast('Marked as live'+(tool.url?' — URL saved':''), 'saved');
+  } else {
+    showToast('Marked as live — add the URL later', 'saved');
+  }
+  pendingUrlToolId = null;
+  scheduleSave();
+  render();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp = document.getElementById('url-modal-input');
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter') confirmUrl(true);
+    if(e.key==='Escape') confirmUrl(false);
+  });
+});
+
+function updateField(id, field, value){
+  const t = tools.find(t=>t.id===id);
+  if(t){ t[field]=value; updateStats(); scheduleSave(); }
+}
+function updateNotes(id, value){ updateField(id,'notes',value); }
+
+function deleteTool(id){
+  if(!confirm('Remove this tool from the tracker?')) return;
+  tools = tools.filter(t=>t.id!==id);
+  render(); scheduleSave();
+}
+
+function saveInlineUrl(id){
+  const input = document.getElementById('urlp-'+id);
+  if(!input) return;
+  const raw = input.value.trim();
+  const tool = tools.find(t=>t.id===id);
+  if(!tool) return;
+  tool.url = raw ? (raw.startsWith('/')?raw:'/'+raw) : '';
+  scheduleSave(); render();
+  if(tool.url) showToast('URL saved — link is now active','saved');
+}
+
+// ── Filter + render ──
+function filtered(){
+  const q = document.getElementById('search').value.toLowerCase();
+  const fS = document.getElementById('filter-status').value || activeFilter;
+  const fA = document.getElementById('filter-assignee').value;
+  const fC = document.getElementById('filter-category').value;
+  const list = tools.filter(t=>{
+    if(q && !t.name.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q)) return false;
+    if(fS && t.status!==fS) return false;
+    if(fA && t.assignee!==fA) return false;
+    if(fC && t.category!==fC) return false;
+    return true;
+  });
+  list.sort((a,b)=>{
+    const diff = (STATUS_ORDER[a.status]??0)-(STATUS_ORDER[b.status]??0);
+    return statusSortAsc ? diff : -diff;
+  });
+  return list;
+}
+
+function render(){ updateStats(); renderSummary(); currentView==='table'?renderTable(filtered()):renderCards(filtered()); }
+
+function updateStats(){
+  const total = tools.length||1;
+  document.getElementById('stat-total').textContent = tools.length;
+  document.getElementById('stat-live').textContent = tools.filter(t=>t.status==='live').length;
+  document.getElementById('stat-wip').textContent = tools.filter(t=>t.status==='progress').length;
+  document.getElementById('stat-queue').textContent = tools.filter(t=>t.status==='not-started').length;
+  const lp = tools.filter(t=>t.status==='live').length/total*100;
+  const pp = tools.filter(t=>t.status==='progress').length/total*100;
+  const np = tools.filter(t=>t.status==='not-started').length/total*100;
+  document.getElementById('progress-pct').textContent = Math.round(lp)+'% live';
+  document.getElementById('progress-track').innerHTML =
+    `<div class="progress-seg" style="width:${lp}%;background:var(--green)"></div>
+     <div class="progress-seg" style="width:${pp}%;background:var(--yellow)"></div>
+     <div class="progress-seg" style="width:${np}%;background:var(--text-dim)"></div>`;
+}
+
+function renderSummary(){
+  const counts={all:tools.length,live:0,progress:0,'not-started':0};
+  tools.forEach(t=>{if(counts[t.status]!==undefined)counts[t.status]++;});
+  const labels={all:'All',live:'Live',progress:'In progress','not-started':'Not started'};
+  document.getElementById('summary-bar').innerHTML = Object.entries(counts).map(([k,v])=>{
+    const active=(k==='all'&&!activeFilter)||k===activeFilter?'active':'';
+    return `<button class="summary-pill ${k} ${active}" onclick="setFilter('${k}')">${labels[k]} <strong>${v}</strong></button>`;
+  }).join('');
+}
+
+function setFilter(f){ activeFilter=f==='all'?'':f; document.getElementById('filter-status').value=''; render(); }
+
+function renderTable(list){
+  const tbody = document.getElementById('table-body');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><p>No tools match your filters.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(t=>{
+    const linkBtn = t.url
+      ? `<a href="${t.url}" target="_blank" class="icon-btn" title="Open live tool"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg></a>`
+      : `<button class="icon-btn disabled"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg></button>`;
+    return `
+    <tr>
+      <td>
+        <div class="td-name">${t.name}</div>
+        <div class="td-desc">${t.description}</div>
+        ${t.url?`<div class="td-url">${t.url}</div>`:''}
+      </td>
+      <td><span class="td-cat">${t.category}</span></td>
+      <td>
+        ${makeStatusSelect(t.id,t.status)}
+        ${t.status==='live'&&!t.url?`<div class="url-prompt">
+          <input class="url-prompt-input" placeholder="/tool-slug" id="urlp-${t.id}" onkeydown="if(event.key==='Enter')saveInlineUrl(${t.id})">
+          <button class="url-prompt-btn" onclick="saveInlineUrl(${t.id})"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="1.5 6 4.5 9 10.5 3"/></svg></button>
+        </div>`:''}
+      </td>
+      <td>${makeAssigneeSelect(t.id,t.assignee)}</td>
+      <td>${makePrioritySelect(t.id,t.priority)}</td>
+      <td><textarea class="notes-input" rows="2" placeholder="Add notes…" onblur="updateNotes(${t.id},this.value)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}">${t.notes||''}</textarea></td>
+      <td><div class="action-row">
+        ${linkBtn}
+        <button class="icon-btn danger" onclick="deleteTool(${t.id})" title="Remove"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l9 9M11 2l-9 9"/></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCards(list){
+  const grid = document.getElementById('cards-body');
+  if(!list.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><p>No tools match your filters.</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(t=>`
+    <div class="tool-card">
+      <div class="card-header">
+        <div><div class="card-name">${t.name}</div><div class="card-desc">${t.description}</div></div>
+        <div class="action-row" style="flex-shrink:0">
+          ${t.url
+            ?`<a href="${t.url}" target="_blank" class="icon-btn"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg></a>`
+            :`<button class="icon-btn disabled"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg></button>`}
+          <button class="icon-btn danger" onclick="deleteTool(${t.id})"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l9 9M11 2l-9 9"/></svg></button>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="card-field"><label>Status</label>${makeStatusSelect(t.id,t.status)}</div>
+        <div class="card-field"><label>Assignee</label>${makeAssigneeSelect(t.id,t.assignee)}</div>
+        <div class="card-field"><label>Priority</label>${makePrioritySelect(t.id,t.priority)}</div>
+        <div class="card-field"><label>Category</label><span class="td-cat">${t.category}</span></div>
+      </div>
+      ${t.status==='live'&&!t.url?`<div style="padding-top:8px;border-top:1px solid var(--border);">
+        <div style="font-size:9px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;font-family:'DM Mono',monospace;">Add live URL</div>
+        <div class="url-prompt">
+          <input class="url-prompt-input" placeholder="/tool-slug" id="urlpc-${t.id}" onkeydown="if(event.key==='Enter')saveInlineUrl(${t.id})">
+          <button class="url-prompt-btn" onclick="saveInlineUrl(${t.id})"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="1.5 6 4.5 9 10.5 3"/></svg></button>
+        </div>
+      </div>`:''}
+      <div class="card-notes"><label>Notes</label>
+        <textarea class="notes-input" rows="2" placeholder="Add notes…" onblur="updateNotes(${t.id},this.value)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}">${t.notes||''}</textarea>
+      </div>
+    </div>`).join('');
+}
+
+function setView(v){
+  currentView = v;
+  document.getElementById('table-view').classList.toggle('hidden',v!=='table');
+  document.getElementById('cards-view').classList.toggle('hidden',v!=='cards');
+  document.getElementById('view-table').classList.toggle('active',v==='table');
+  document.getElementById('view-cards').classList.toggle('active',v==='cards');
+  render();
+}
+
+function openModal(){ document.getElementById('modal-overlay').classList.remove('hidden'); }
+function closeModal(){ document.getElementById('modal-overlay').classList.add('hidden'); }
+function closeModalOutside(e){ if(e.target===document.getElementById('modal-overlay')) closeModal(); }
+
+function addTool(){
+  const name = document.getElementById('f-name').value.trim();
+  if(!name){ alert('Please enter a tool name.'); return; }
+  const newId = tools.length ? Math.max(...tools.map(t=>t.id))+1 : 1;
+  tools.push({
+    id:newId, name,
+    description: document.getElementById('f-desc').value.trim(),
+    category: document.getElementById('f-cat').value,
+    status: document.getElementById('f-status').value,
+    assignee: document.getElementById('f-assignee').value,
+    priority: document.getElementById('f-priority').value,
+    url: document.getElementById('f-url').value.trim(),
+    notes: document.getElementById('f-notes').value.trim()
+  });
+  closeModal();
+  ['f-name','f-desc','f-url','f-notes'].forEach(id=>document.getElementById(id).value='');
+  render(); scheduleSave();
+}
+
+let toastTimer;
+function showToast(msg, type='saved'){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+init();
+</script>
+</body>
+</html>
