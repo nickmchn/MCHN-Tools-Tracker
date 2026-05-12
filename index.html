@@ -459,11 +459,11 @@ td{padding:12px 14px;font-size:13px;vertical-align:middle;}
         <table>
           <thead>
             <tr>
-              <th style="width:26%">Tool</th>
-              <th style="width:9%">Category</th>
-              <th style="width:14%"><button class="sort-btn active" id="sort-status-btn" onclick="toggleStatusSort()">Status <span class="sort-arrow" id="sort-arrow">↑</span></button></th>
-              <th style="width:9%">Assignee</th>
-              <th style="width:8%">Priority</th>
+              <th style="width:26%"><button class="sort-btn" id="sort-name" onclick="setSort('name')">Tool <span class="sort-arrow">↕</span></button></th>
+              <th style="width:9%"><button class="sort-btn" id="sort-category" onclick="setSort('category')">Category <span class="sort-arrow">↕</span></button></th>
+              <th style="width:14%"><button class="sort-btn active" id="sort-status" onclick="setSort('status')">Status <span class="sort-arrow">↑</span></button></th>
+              <th style="width:9%"><button class="sort-btn" id="sort-assignee" onclick="setSort('assignee')">Assignee <span class="sort-arrow">↕</span></button></th>
+              <th style="width:8%"><button class="sort-btn" id="sort-priority" onclick="setSort('priority')">Priority <span class="sort-arrow">↕</span></button></th>
               <th style="width:26%">Notes</th>
               <th style="width:8%"></th>
             </tr>
@@ -603,13 +603,26 @@ let saveTimer = null;
 let lastSnapshot = '';
 let statusSortAsc = true;
 const STATUS_ORDER = {'not-started':0,'progress':1,'live':2};
+const PRIORITY_ORDER = {'high':0,'medium':1,'low':2};
 let pendingUrlToolId = null;
+let sortCol = 'status';
+let sortAsc = true;
 
-function toggleStatusSort(){
-  statusSortAsc = !statusSortAsc;
-  document.getElementById('sort-arrow').textContent = statusSortAsc ? '↑' : '↓';
+function setSort(col){
+  if(sortCol === col){ sortAsc = !sortAsc; }
+  else { sortCol = col; sortAsc = true; }
+  // Update header arrows
+  ['name','category','status','assignee','priority'].forEach(c=>{
+    const btn = document.getElementById('sort-'+c);
+    if(!btn) return;
+    btn.classList.toggle('active', c === sortCol);
+    btn.querySelector('.sort-arrow').textContent = c === sortCol ? (sortAsc ? '↑' : '↓') : '↕';
+  });
   render();
 }
+
+// Keep legacy function for backward compat
+function toggleStatusSort(){ setSort('status'); }
 
 function setSyncStatus(state, label){
   document.getElementById('sync-dot').className = 'sync-dot ' + state;
@@ -794,8 +807,18 @@ function filtered(){
     return true;
   });
   list.sort((a,b)=>{
-    const diff = (STATUS_ORDER[a.status]??0)-(STATUS_ORDER[b.status]??0);
-    return statusSortAsc ? diff : -diff;
+    let av, bv;
+    switch(sortCol){
+      case 'name':     av=a.name.toLowerCase();     bv=b.name.toLowerCase();     break;
+      case 'category': av=a.category.toLowerCase(); bv=b.category.toLowerCase(); break;
+      case 'status':   av=STATUS_ORDER[a.status]??0;   bv=STATUS_ORDER[b.status]??0;   break;
+      case 'assignee': av=a.assignee.toLowerCase(); bv=b.assignee.toLowerCase(); break;
+      case 'priority': av=PRIORITY_ORDER[a.priority]??1; bv=PRIORITY_ORDER[b.priority]??1; break;
+      default:         av=0; bv=0;
+    }
+    if(av < bv) return sortAsc ? -1 : 1;
+    if(av > bv) return sortAsc ? 1 : -1;
+    return 0;
   });
   return list;
 }
