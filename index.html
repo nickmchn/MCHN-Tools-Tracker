@@ -408,15 +408,6 @@ td{padding:12px 14px;font-size:13px;vertical-align:middle;}
     <p>Loading shared tracker…</p>
   </div>
 
-  <div id="token-setup" class="loading-state hidden">
-    <div style="max-width:420px;margin:0 auto;background:var(--surface);border:1px solid var(--border);padding:28px;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--text);margin-bottom:8px;">Connect to GitHub</div>
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">Paste your GitHub personal access token to sync this tracker. It's saved in your browser — you won't need to do this again.</p>
-      <input id="token-input" type="password" placeholder="ghp_..." style="width:100%;padding:10px 12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;outline:none;margin-bottom:12px;">
-      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveToken()">Connect</button>
-    </div>
-  </div>
-
   <div id="main-content" class="hidden">
     <div class="toolbar">
       <div class="toolbar-left">
@@ -579,33 +570,9 @@ td{padding:12px 14px;font-size:13px;vertical-align:middle;}
 </footer>
 
 <script>
-// ── GitHub config — REPLACE THESE WITH YOUR CREDENTIALS ──
-const GH_REPO  = 'nickcadence/MCHN-Tools-Tracker';
-const GH_FILE  = 'tools.json';
-const GH_API   = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
-let GH_TOKEN = localStorage.getItem('mchn_gh_token') || '';
-let GH_HEADS = {};
+// ── API (Vercel serverless proxy — token lives on server, never in browser) ──
+const API = '/api/tools';
 let fileSha = null;
-
-function buildHeaders(){
-  GH_HEADS = { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
-}
-
-function promptForToken(){
-  document.getElementById('loading-state').classList.add('hidden');
-  document.getElementById('token-setup').classList.remove('hidden');
-}
-
-function saveToken(){
-  const val = document.getElementById('token-input').value.trim();
-  if(!val){ alert('Please paste your GitHub token.'); return; }
-  GH_TOKEN = val;
-  localStorage.setItem('mchn_gh_token', val);
-  document.getElementById('token-setup').classList.add('hidden');
-  document.getElementById('loading-state').classList.remove('hidden');
-  buildHeaders();
-  init();
-}
 
 const DEFAULT_TOOLS = [
   {id:1,name:"Retiree Budget",description:"Monthly income and expenses in retirement. Guaranteed income coverage and what-if scenarios.",category:"Budgeting",status:"live",assignee:"Unassigned",priority:"high",url:"/budget",notes:""},
@@ -649,30 +616,28 @@ function setSyncStatus(state, label){
   document.getElementById('sync-label').textContent = label;
 }
 
-// ── GitHub API ──
+// ── API calls ──
 async function ghGet(){
-  const res = await fetch(GH_API, { headers: GH_HEADS });
+  const res = await fetch(API);
   if(!res.ok) throw new Error('GET ' + res.status);
   const json = await res.json();
   fileSha = json.sha;
-  return JSON.parse(atob(json.content.replace(/\n/g,''))).tools || [];
+  return json.tools || [];
 }
 
 async function ghPut(data){
-  const body = {
-    message: 'Tracker update',
-    content: btoa(unescape(encodeURIComponent(JSON.stringify({ tools: data }, null, 2)))),
-    sha: fileSha
-  };
-  const res = await fetch(GH_API, { method:'PUT', headers:GH_HEADS, body:JSON.stringify(body) });
+  const res = await fetch(API, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tools: data, sha: fileSha })
+  });
   if(!res.ok) throw new Error('PUT ' + res.status);
-  fileSha = (await res.json()).content.sha;
+  const json = await res.json();
+  fileSha = json.sha;
 }
 
 // ── Init ──
 async function init(){
-  buildHeaders();
-  if(!GH_TOKEN){ promptForToken(); return; }
   setSyncStatus('syncing', 'Connecting…');
   try {
     let existing = await ghGet();
@@ -691,8 +656,7 @@ async function init(){
   } catch(e){
     setSyncStatus('error', 'Connection failed');
     document.getElementById('loading-state').innerHTML =
-      `<p style="color:var(--red);font-size:14px;margin-bottom:12px;">Could not connect to GitHub. Token may be invalid.</p>
-       <button class="btn btn-primary" onclick="localStorage.removeItem('mchn_gh_token');location.reload();">Reset Token</button>`;
+      `<p style="color:var(--red);font-size:14px;">Could not connect. Please refresh and try again.</p>`;
   }
 }
 
