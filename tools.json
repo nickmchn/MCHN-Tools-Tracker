@@ -82,7 +82,7 @@
       "name": "Rent vs. Sell Property",
       "description": "Should you keep renting out a property or sell it? Models cash flow, capital gains, Section 121 exclusion, and net proceeds.",
       "category": "Planning",
-      "status": "live",
+      "status": "not-started",
       "assignee": "Unassigned",
       "priority": "high",
       "url": "/rent-vs-sell",
