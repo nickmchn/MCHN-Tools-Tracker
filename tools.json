@@ -16,7 +16,7 @@
       "name": "Personal Budget",
       "description": "Monthly pay, fixed and variable expenses, and savings goals. Savings rate and what-if scenarios.",
       "category": "Budgeting",
-      "status": "live",
+      "status": "not-started",
       "assignee": "Unassigned",
       "priority": "high",
       "url": "/personal-budget",
