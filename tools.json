@@ -38,7 +38,7 @@
       "name": "Quarterly Tax Estimator",
       "description": "For business owners. Actual P&L each quarter vs. safe harbor side by side.",
       "category": "Tax",
-      "status": "live",
+      "status": "not-started",
       "assignee": "Unassigned",
       "priority": "high",
       "url": "/tax-estimator",
