@@ -5,7 +5,7 @@
       "name": "Retiree Budget",
       "description": "Monthly income and expenses in retirement. Guaranteed income coverage and what-if scenarios.",
       "category": "Budgeting",
-      "status": "not-started",
+      "status": "progress",
       "assignee": "Charlie",
       "priority": "high",
       "url": "/budget",
